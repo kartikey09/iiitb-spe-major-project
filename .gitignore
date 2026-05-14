@@ -1,0 +1,22 @@
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Large Binaries
+jenkins.war
+*.jar
+*.exe
+*.dll
+*.so
+
+# Environment
+.env
+.venv/
+venv/
+node_modules/
+
+# OS Files
+.DS_Store
+Thumbs.db
