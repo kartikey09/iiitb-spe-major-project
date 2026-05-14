@@ -11,6 +11,16 @@ jenkins.war
 *.dll
 *.so
 
+# Jenkins Data Directory
+jenkins/
+
+# Node modules (already caught by wildcard, but adding specifically just in case)
+frontend/node_modules/
+
+# Database Setup Files (Requested by User)
+01_schema.sql
+02_seed_data.sql
+
 # Environment
 .env
 .venv/
