@@ -91,14 +91,14 @@ pipeline {
         }
         success {
             echo "Action ${params.ACTION} Succeeded!"
-            mail to: 'admin@petcollege.edu',
-                 subject: "✅ SUCCESS: Jenkins Pipeline '${env.JOB_NAME}' [${env.BUILD_NUMBER}]",
+            mail to: 'kartikeyranawork@gmail.com',
+                 subject: "SUCCESS: Jenkins Pipeline '${env.JOB_NAME}' [${env.BUILD_NUMBER}]",
                  body: "The Jenkins CI/CD pipeline finished successfully.\n\nAction Executed: ${params.ACTION}\n\nView build details here: ${env.BUILD_URL}"
         }
         failure {
             echo "Action ${params.ACTION} Failed. Check logs for details."
-            mail to: 'admin@petcollege.edu',
-                 subject: "❌ FAILED: Jenkins Pipeline '${env.JOB_NAME}' [${env.BUILD_NUMBER}]",
+            mail to: 'kartikeyranawork@gmail.com',
+                 subject: "FAILED: Jenkins Pipeline '${env.JOB_NAME}' [${env.BUILD_NUMBER}]",
                  body: "The Jenkins CI/CD pipeline encountered an error and FAILED.\n\nAction Executed: ${params.ACTION}\n\nPlease check the build logs to diagnose the issue: ${env.BUILD_URL}"
         }
     }
