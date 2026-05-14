@@ -33,6 +33,10 @@ log "Enabling ingress addon..."
 minikube addons enable ingress
 ok "Ingress enabled"
 
+log "Enabling metrics-server addon for HPA..."
+minikube addons enable metrics-server
+ok "Metrics server enabled"
+
 # ── 2. Point Docker to Minikube ───────────────────────────────────────────────
 log "Configuring Docker to use Minikube's daemon..."
 eval "$(minikube docker-env)"
@@ -91,6 +95,9 @@ kubectl apply -f "$K8S_DIR/04-frontend.yaml"
 
 log "Deploying ingress load balancer..."
 kubectl apply -f "$K8S_DIR/05-ingress.yaml"
+
+log "Deploying autoscalers (HPA)..."
+kubectl apply -f "$K8S_DIR/07-hpa.yaml"
 
 log "Waiting for backend rollout..."
 kubectl rollout status deployment/backend -n "$NAMESPACE" --timeout=120s
