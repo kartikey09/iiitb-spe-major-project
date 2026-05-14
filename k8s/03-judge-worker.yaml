@@ -1,0 +1,46 @@
+---
+# ── DaemonSet ────────────────────────────────────────────────────────────────
+# Judge runs as a DaemonSet (one per node) because it needs privileged access
+# to the host cgroup filesystem for the isolate sandbox.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: judge-worker
+  namespace: judge-system
+  labels:
+    app: judge-worker
+spec:
+  selector:
+    matchLabels:
+      app: judge-worker
+  template:
+    metadata:
+      labels:
+        app: judge-worker
+    spec:
+      # Required for isolate sandbox cgroup manipulation
+      hostPID: true
+      containers:
+        - name: judge-worker
+          image: judge-worker:latest
+          imagePullPolicy: Never
+          env:
+            - name: KAFKA_BROKER
+              value: "kafka:9092"
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: cgroup
+              mountPath: /sys/fs/cgroup
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "1Gi"
+      volumes:
+        - name: cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+            type: Directory

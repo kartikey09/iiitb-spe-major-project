@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  judge:
+    build: 
+      context: ./custom-judge
+    container_name: judge
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    ports:
+      - "8080:8080"
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    ports:
+      - "8082:8082"
+    depends_on:
+      - judge
+    restart: always
+
+  db:
+    image: postgres:16-alpine
+    container_name: db
+    environment:
+      POSTGRES_USER: petuser
+      POSTGRES_PASSWORD: petpassword
+      POSTGRES_DB: petdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./01_schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./02_seed_data.sql:/docker-entrypoint-initdb.d/2-seed.sql
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
+    depends_on:
+      - backend
+    restart: always
