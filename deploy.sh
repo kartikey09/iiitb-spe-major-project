@@ -119,7 +119,6 @@ echo ""
 MINIKUBE_IP=$(minikube ip)
 echo "  Ingress (Load Balancer): http://$MINIKUBE_IP"
 echo "  Frontend NodePort:       http://$MINIKUBE_IP:30300"
-echo "  Backend NodePort:        http://$MINIKUBE_IP:30082"
 echo ""
 echo "  Or use:    minikube service frontend -n $NAMESPACE"
 echo "═══════════════════════════════════════════════════════"

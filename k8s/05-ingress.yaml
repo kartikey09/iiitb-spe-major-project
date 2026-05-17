@@ -3,12 +3,17 @@ kind: Ingress
 metadata:
   name: judge-ingress
   namespace: judge-system
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - http:
       paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend
+            port:
+              number: 8082
       - path: /
         pathType: Prefix
         backend:
