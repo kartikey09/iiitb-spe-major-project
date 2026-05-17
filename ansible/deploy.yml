@@ -37,9 +37,9 @@
       command: kubectl apply -f {{ k8s_dir }}/00-namespace.yaml
       changed_when: true
 
-    - name: Create PostgreSQL ConfigMap
+    - name: Create PostgreSQL Secret
       shell: |
-        kubectl create configmap postgres-init-scripts \
+        kubectl create secret generic postgres-init-scripts \
           --from-file=1-schema.sql=../01_schema.sql \
           --from-file=2-seed.sql=../02_seed_data.sql \
           --namespace={{ namespace }} \
@@ -49,6 +49,7 @@
     - name: Apply Kubernetes Manifests
       shell: kubectl apply -f {{ k8s_dir }}/{{ item }}
       loop:
+        - 00-secret.yaml
         - 01-postgres.yaml
         - 02-kafka.yaml
         - 03-judge-worker.yaml

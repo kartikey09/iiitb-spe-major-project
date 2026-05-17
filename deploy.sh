@@ -60,14 +60,18 @@ log "Creating namespace $NAMESPACE..."
 kubectl apply -f "$K8S_DIR/00-namespace.yaml"
 ok "Namespace ready"
 
-# ── 5. Create ConfigMap with SQL init scripts ─────────────────────────────────
-log "Creating PostgreSQL init SQL ConfigMap..."
-kubectl create configmap postgres-init-scripts \
+log "Deploying Secrets..."
+kubectl apply -f "$K8S_DIR/00-secret.yaml"
+ok "Secrets deployed"
+
+# ── 5. Create Secret with SQL init scripts ─────────────────────────────────
+log "Creating PostgreSQL init SQL Secret..."
+kubectl create secret generic postgres-init-scripts \
   --from-file=1-schema.sql="$SCRIPT_DIR/01_schema.sql" \
   --from-file=2-seed.sql="$SCRIPT_DIR/02_seed_data.sql" \
   --namespace="$NAMESPACE" \
   --dry-run=client -o yaml | kubectl apply -f -
-ok "SQL ConfigMap applied"
+ok "SQL Secret applied"
 
 # ── 6. Deploy PostgreSQL ──────────────────────────────────────────────────────
 log "Deploying PostgreSQL..."

@@ -11,13 +11,14 @@ spec:
     requests:
       storage: 2Gi
 ---
-# ── ConfigMap: SQL init files ─────────────────────────────────────────────────
+# ── Secret: SQL init files ─────────────────────────────────────────────────
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
   name: postgres-init-sql
   namespace: judge-system
-data:
+type: Opaque
+stringData:
   # Actual SQL content is mounted from host via the deploy script
   # (see deploy.sh – we create a secret from file instead for large content)
 ---
@@ -42,13 +43,9 @@ spec:
       containers:
         - name: postgres
           image: postgres:16-alpine
-          env:
-            - name: POSTGRES_USER
-              value: "petuser"
-            - name: POSTGRES_PASSWORD
-              value: "petpassword"
-            - name: POSTGRES_DB
-              value: "petdb"
+          envFrom:
+            - secretRef:
+                name: db-secret
           ports:
             - containerPort: 5432
           volumeMounts:
@@ -69,8 +66,8 @@ spec:
           persistentVolumeClaim:
             claimName: postgres-pvc
         - name: init-scripts
-          configMap:
-            name: postgres-init-scripts
+          secret:
+            secretName: postgres-init-scripts
 ---
 # ── Service ───────────────────────────────────────────────────────────────────
 apiVersion: v1

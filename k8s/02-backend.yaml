@@ -28,11 +28,20 @@ spec:
             - name: DB_HOST
               value: "db"
             - name: DB_USER
-              value: "petuser"
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
             - name: DB_PASS
-              value: "petpassword"
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
             - name: DB_NAME
-              value: "petdb"
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_DB
             - name: KAFKA_BROKER
               value: "kafka:9092"
           resources:
