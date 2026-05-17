@@ -28,19 +28,31 @@ pipeline {
             }
         }
 
-        stage('3. Provision & Deploy Infrastructure') {
+                stage('3. Provision & Deploy Infrastructure') {
             steps {
                 script {
-                    if (params.ACTION == 'Deploy') {
-                        echo "Executing Ansible Deploy Playbook..."
-                        sh 'cd ansible && ansible-playbook deploy.yml'
-                    } else if (params.ACTION == 'Cleanup') {
-                        echo "Executing Ansible Cleanup Playbook..."
-                        sh 'cd ansible && ansible-playbook cleanup.yml'
+                    // Inject the Ansible Vault password from Jenkins Credentials
+                    withCredentials([string(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS')]) {
+                        if (params.ACTION == 'Deploy') {
+                            echo "Executing Ansible Deploy Playbook..."
+                            sh '''
+                                echo "$VAULT_PASS" > ansible/.vault_pass.txt
+                                cd ansible && ansible-playbook deploy.yml
+                                rm -f .vault_pass.txt
+                            '''
+                        } else if (params.ACTION == 'Cleanup') {
+                            echo "Executing Ansible Cleanup Playbook..."
+                            sh '''
+                                echo "$VAULT_PASS" > ansible/.vault_pass.txt
+                                cd ansible && ansible-playbook cleanup.yml
+                                rm -f .vault_pass.txt
+                            '''
+                        }
                     }
                 }
             }
         }
+
         
         stage('4. Verify Kubernetes Rollout') {
             when {
