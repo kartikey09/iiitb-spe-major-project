@@ -3,34 +3,5 @@
   connection: local
   gather_facts: false
 
-  tasks:
-    - name: Prune Dangling Docker Images & Volumes
-      shell: |
-        eval $(minikube docker-env)
-        # Prunes stopped containers, unused networks, and dangling images
-        docker system prune -f 
-        # Prunes unattached volumes to free up disk space
-        docker volume prune -f
-      ignore_errors: true
-      changed_when: true
-      register: prune_result
-
-    - name: Display Prune Results
-      debug:
-        var: prune_result.stdout_lines
-
-    - name: Suspend Minikube (Frees RAM/CPU instantly)
-      command: minikube stop
-      register: stop_mk
-      changed_when: true
-
-    - name: Cleanup Summary
-      debug:
-        msg: 
-          - "========================================================"
-          - "🧹 Cleanup Complete!"
-          - "-> Minikube VM has been gracefully stopped, instantly freeing up 6GB of RAM and 4 CPU cores."
-          - "-> Dangling Docker layers and unused volumes have been purged to reclaim SSD space."
-          - "🚀 Optimized for Fast Boot: Your database data and core docker images are safely persisted on disk."
-          - "   When you're ready to code again, just run 'ansible-playbook ansible/deploy.yml' and it will boot up in seconds!"
-          - "========================================================"
+  roles:
+    - k8s_cleanup

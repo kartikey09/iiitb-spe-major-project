@@ -33,10 +33,10 @@ pipeline {
                 script {
                     if (params.ACTION == 'Deploy') {
                         echo "Executing Ansible Deploy Playbook..."
-                        sh 'ansible-playbook ansible/deploy.yml'
+                        sh 'cd ansible && ansible-playbook deploy.yml'
                     } else if (params.ACTION == 'Cleanup') {
                         echo "Executing Ansible Cleanup Playbook..."
-                        sh 'ansible-playbook ansible/cleanup.yml'
+                        sh 'cd ansible && ansible-playbook cleanup.yml'
                     }
                 }
             }

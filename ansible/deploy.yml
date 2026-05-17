@@ -3,79 +3,10 @@
   connection: local
   gather_facts: false
   vars:
-    k8s_dir: "../k8s"
+    k8s_dir: "{{ playbook_dir }}/../k8s"
     namespace: "judge-system"
 
-  tasks:
-    - name: Start Minikube (Optimized for Fast Startup)
-      shell: |
-        if minikube status | grep -q "Running"; then
-          echo "Already running"
-        else
-          minikube start --cpus=4 --memory=6144 --disk-size=20g --driver=docker --container-runtime=docker --kubernetes-version=stable
-        fi
-      register: mk_start
-      changed_when: "'Already running' not in mk_start.stdout"
-
-    - name: Enable Minikube addons (Ingress & Metrics)
-      shell: |
-        minikube addons enable ingress
-        minikube addons enable metrics-server
-      changed_when: false
-
-    - name: Build Docker images in Minikube Daemon
-      shell: |
-        eval $(minikube docker-env)
-        docker build -t judge-backend:latest ./backend
-        docker build -t judge-frontend:latest ./frontend
-        docker build -t judge-worker:latest ./custom-judge
-      args:
-        chdir: "../"
-      changed_when: false
-
-    - name: Apply Namespace
-      command: kubectl apply -f {{ k8s_dir }}/00-namespace.yaml
-      changed_when: true
-
-    - name: Create PostgreSQL Secret
-      shell: |
-        kubectl create secret generic postgres-init-scripts \
-          --from-file=1-schema.sql=../01_schema.sql \
-          --from-file=2-seed.sql=../02_seed_data.sql \
-          --namespace={{ namespace }} \
-          --dry-run=client -o yaml | kubectl apply -f -
-      changed_when: true
-
-    - name: Apply Kubernetes Manifests
-      shell: kubectl apply -f {{ k8s_dir }}/{{ item }}
-      loop:
-        - 00-secret.yaml
-        - 01-postgres.yaml
-        - 02-kafka.yaml
-        - 03-judge-worker.yaml
-        - 04-frontend.yaml
-        - 05-ingress.yaml
-        - 02-backend.yaml
-        - 07-hpa.yaml
-      changed_when: true
-
-    - name: Wait for Deployments to Rollout & Restart Judge
-      shell: |
-        kubectl rollout restart daemonset judge-worker -n {{ namespace }}
-        kubectl rollout status daemonset judge-worker -n {{ namespace }} --timeout=120s
-        kubectl rollout status deployment/backend -n {{ namespace }} --timeout=120s
-        kubectl rollout status deployment/frontend -n {{ namespace }} --timeout=120s
-      changed_when: true
-
-    - name: Get Minikube IP
-      command: minikube ip
-      register: mk_ip
-      changed_when: false
-
-    - name: Deployment Complete
-      debug:
-        msg: 
-          - "========================================================"
-          - " Application deployed successfully via Ansible!"
-          - " Access the application at: http://{{ mk_ip.stdout }}"
-          - "========================================================"
+  roles:
+    - minikube
+    - docker_build
+    - k8s_deploy

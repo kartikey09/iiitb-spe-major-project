@@ -1,0 +1,56 @@
+---
+- name: Apply Namespace
+  command: kubectl apply -f {{ k8s_dir }}/00-namespace.yaml
+  changed_when: true
+
+- name: Create Vault Secret (for PostgreSQL DB Credentials)
+  shell: |
+    kubectl create secret generic db-secret \
+      --from-literal=POSTGRES_USER={{ vault_postgres_user }} \
+      --from-literal=POSTGRES_PASSWORD={{ vault_postgres_password }} \
+      --from-literal=POSTGRES_DB={{ vault_postgres_db }} \
+      --namespace={{ namespace }} \
+      --dry-run=client -o yaml | kubectl apply -f -
+  changed_when: true
+
+- name: Create PostgreSQL Init Scripts Secret
+  shell: |
+    kubectl create secret generic postgres-init-scripts \
+      --from-file=1-schema.sql={{ playbook_dir }}/../01_schema.sql \
+      --from-file=2-seed.sql={{ playbook_dir }}/../02_seed_data.sql \
+      --namespace={{ namespace }} \
+      --dry-run=client -o yaml | kubectl apply -f -
+  changed_when: true
+
+- name: Apply Kubernetes Manifests
+  shell: kubectl apply -f {{ k8s_dir }}/{{ item }}
+  loop:
+    - 01-postgres.yaml
+    - 02-kafka.yaml
+    - 03-judge-worker.yaml
+    - 04-frontend.yaml
+    - 05-ingress.yaml
+    - 02-backend.yaml
+    - 07-hpa.yaml
+  changed_when: true
+
+- name: Wait for Deployments to Rollout & Restart Judge
+  shell: |
+    kubectl rollout restart daemonset judge-worker -n {{ namespace }}
+    kubectl rollout status daemonset judge-worker -n {{ namespace }} --timeout=120s
+    kubectl rollout status deployment/backend -n {{ namespace }} --timeout=120s
+    kubectl rollout status deployment/frontend -n {{ namespace }} --timeout=120s
+  changed_when: true
+
+- name: Get Minikube IP
+  command: minikube ip
+  register: mk_ip
+  changed_when: false
+
+- name: Deployment Complete
+  debug:
+    msg: 
+      - "========================================================"
+      - " Application deployed successfully via Ansible!"
+      - " Access the application at: http://{{ mk_ip.stdout }}"
+      - "========================================================"

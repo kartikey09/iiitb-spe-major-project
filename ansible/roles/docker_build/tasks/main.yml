@@ -1,0 +1,10 @@
+---
+- name: Build Docker images in Minikube Daemon
+  shell: |
+    eval $(minikube docker-env)
+    docker build -t judge-backend:latest ./backend
+    docker build -t judge-frontend:latest ./frontend
+    docker build -t judge-worker:latest ./custom-judge
+  args:
+    chdir: "{{ playbook_dir }}/../"
+  changed_when: false

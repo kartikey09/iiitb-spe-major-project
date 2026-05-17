@@ -12,6 +12,7 @@ jenkins.war
 *.so
 
 # Jenkins Data Directory
+.vault_pass.txt
 jenkins/
 
 # Node modules (already caught by wildcard, but adding specifically just in case)

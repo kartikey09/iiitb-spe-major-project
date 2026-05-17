@@ -1,0 +1,16 @@
+---
+- name: Start Minikube (Optimized for Fast Startup)
+  shell: |
+    if minikube status | grep -q "Running"; then
+      echo "Already running"
+    else
+      minikube start --cpus=4 --memory=6144 --disk-size=20g --driver=docker --container-runtime=docker --kubernetes-version=stable
+    fi
+  register: mk_start
+  changed_when: "'Already running' not in mk_start.stdout"
+
+- name: Enable Minikube addons (Ingress & Metrics)
+  shell: |
+    minikube addons enable ingress
+    minikube addons enable metrics-server
+  changed_when: false

@@ -61,7 +61,10 @@ kubectl apply -f "$K8S_DIR/00-namespace.yaml"
 ok "Namespace ready"
 
 log "Deploying Secrets..."
-kubectl apply -f "$K8S_DIR/00-secret.yaml"
+kubectl create secret generic db-secret \
+  --from-env-file="$SCRIPT_DIR/.env" \
+  --namespace="$NAMESPACE" \
+  --dry-run=client -o yaml | kubectl apply -f -
 ok "Secrets deployed"
 
 # ── 5. Create Secret with SQL init scripts ─────────────────────────────────
