@@ -65,11 +65,18 @@ pipeline {
                     echo "Installing Python requests library..."
                     pip3 install requests --break-system-packages || pip3 install requests
                     
+                    echo "Cleaning up any zombie port-forwards..."
+                    pkill -f "kubectl port-forward" || true
+                    sleep 2
+
                     echo "Setting up temporary port-forward for testing..."
-                    kubectl port-forward svc/backend 8082:8082 -n ${NAMESPACE} > /dev/null 2>&1 &
+                    kubectl port-forward svc/backend 8082:8082 -n ${NAMESPACE} > pf.log 2>&1 &
                     PF_PID=$!
-                    sleep 3
+                    sleep 5
                     
+                    echo "Checking port-forward logs:"
+                    cat pf.log || true
+
                     echo "Running Stress Test Suite against the deployed infrastructure..."
                     set +e # Don't exit immediately on test failure
                     python3 stress_test.py http://localhost:8082/api
@@ -77,7 +84,7 @@ pipeline {
                     set -e
                     
                     echo "Cleaning up port-forward..."
-                    kill $PF_PID
+                    kill $PF_PID || true
                     
                     exit $TEST_EXIT_CODE
                 '''
