@@ -39,11 +39,11 @@ export default function App() {
             <div className="w-9 h-9 bg-accent rounded flex items-center justify-center flex-shrink-0">
               <span className="text-accent-foreground font-bold text-xs">LC</span>
             </div>
-            <Link to="/problem-set" className="text-lg font-bold text-accent hover:text-accent/80 transition-colors">LeetCode</Link>
+            <Link to="/problem-set" className="text-lg font-bold text-accent hover:text-accent/80 transition-colors">CheatCode</Link>
           </div>
           <div className="flex items-center gap-6 h-full mr-4">
             <nav className="flex items-center gap-8 h-full">
-              <Link 
+              <Link
                 to="/problem-set"
                 className="text-sm font-medium transition h-full flex items-center text-muted-foreground hover:text-foreground hover:border-b-2 hover:border-amber-500"
               >
